@@ -8,8 +8,12 @@ namespace HeroesApi.Controllers;
 [Route("api/[controller]")]
 public class HeroesController : ControllerBase {
     [HttpGet]
-    public ActionResult<List<Hero>> GetAll() {
-        return Ok(HeroesStore.Heroes);
+    public ActionResult<List<Hero>> GetAll([FromQuery] string? universe = null) {
+        var heroes = HeroesStore.Heroes;
+        if (!string.IsNullOrEmpty(universe)) {
+            heroes = heroes.Where(h => h.Universe.ToString()== universe).ToList();
+        }
+        return Ok(heroes);
     }
     [HttpGet("{id}")]
     public ActionResult<Hero> GetById(int id) {
@@ -19,6 +23,19 @@ public class HeroesController : ControllerBase {
         }
         return Ok(hero);
     }
+    [HttpGet("search")]
+    public ActionResult<List<Hero>> Search([FromQuery] string name) {
+        List<Hero> result = new List<Hero>();
+    foreach (var hero in HeroesStore.Heroes)
+    {
+        if (hero.Name.ToLower().Contains(name.ToLower()))
+        {
+            result.Add(hero);
+        }
+    }
+    return Ok(result);
+    }
+
     [HttpGet("demo")]
     public ActionResult GetDemo() {
         var hero = HeroesStore.Heroes.First();
