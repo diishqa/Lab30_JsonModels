@@ -36,4 +36,29 @@ public class HeroesController : ControllerBase {
             withOurSettings = JsonSerializer.Deserialize<object>( JsonSerializer.Serialize(hero, ourOptions), ourOptions),
         });
     }
+    [HttpGet("serialize")]
+    public ActionResult GetSerialize() {
+        var options = new JsonSerializerOptions {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = true,
+            Converters = { new JsonStringEnumConverter()}
+        };
+        var hero = new Hero {
+            Id =99,
+            Name = "Тест",
+            RealName = "Студент",
+            Universe = Universe.Marvel,
+            PowerLevel = 50,
+            Powers = new() { "пролграммирование", "дебаггинг"},
+            Weapon = new() {Name = "Клавиатура", IsRanged = false},
+            InternalNotes = "Это поле не опдает в Json"
+        };
+        string serialized = JsonSerializer.Serialize(hero, options);
+        var deserialized = JsonSerializer.Deserialize<Hero>(serialized, options);
+        return Ok(new {
+            serializedJson = serialized,
+            deserializedObject=deserialized,
+            internalNotesAfterDesetialize = deserialized?.InternalNotes ?? "null - поле было проигнорировано"
+        });
+    }
 }
